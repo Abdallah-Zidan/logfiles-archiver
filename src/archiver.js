@@ -7,7 +7,7 @@ const { getGlobByMonthObjects, listFilesByPattern } = require("./globber");
 const unlinkGlob = require("./unlink");
 /**
  *
- * @param {import("./types").IArchiverOpts} config
+ * @param {import("./types/types").IArchiverOpts} config
  */
 async function startArchiver(config) {
   const patterns = getGlobByMonthObjects(config);

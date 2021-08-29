@@ -1,5 +1,5 @@
 const startRotater = require("../rotater");
-const config = require("../../config");
+const config = require("../config");
 async function main() {
   console.log(process.env);
   await startRotater(config.baseDir, config.rotatePattern);

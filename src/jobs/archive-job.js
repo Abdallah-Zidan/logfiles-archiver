@@ -1,5 +1,5 @@
 const startArchiver = require("../archiver");
-const config = require("../../config");
+const config = require("../config");
 
 async function main() {
   await startArchiver(config);

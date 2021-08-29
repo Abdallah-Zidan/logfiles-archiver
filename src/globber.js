@@ -33,7 +33,7 @@ function toRegex(str) {
 
 /**
  * @param {string} path
- * @returns {(obj:import("./types").IGlobObject)=>boolean}
+ * @returns {(obj:import("./types/types").IGlobObject)=>boolean}
  */
 function removeEmpty(path) {
   return function ({ pattern }) {
@@ -54,8 +54,8 @@ function patternFormer(base, suffix) {
 
 /**
  *
- * @param {import('./types').BasicOpts} config
- * @returns {import("./types").IGlobObject[]}
+ * @param {import('./types/types').BasicOpts} config
+ * @returns {import("./types/types").IGlobObject[]}
  */
 function getGlobByMonthObjects({
   numberOfSkipped,

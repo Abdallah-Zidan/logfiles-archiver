@@ -1,11 +1,12 @@
 const fs = require("fs");
 const { join } = require("path");
-let data = "d   ta\n".repeat(10000000);
+let data = "d   ta\n";
 /**
  *
  * @param {string[]} names
  */
-module.exports = async function (names, baseDir) {
+module.exports = async function (names, baseDir, word) {
+  data = (word || data).repeat(10000000);
   if (Array.isArray(names) && names.length > 0)
     for (let name of names) {
       if (baseDir) name = join(baseDir, name);

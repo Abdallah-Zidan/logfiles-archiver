@@ -1,11 +1,13 @@
 #!/usr/bin/node
 const { Command } = require("commander");
-
-const config = require("./config");
-const createFiles = require("./src/create");
-const startRotater = require("./src/rotater");
-const startArchiver = require("./src/archiver");
-const startJobs = require("./installjobs");
+const fs = require("fs");
+const {
+  createFiles,
+  startArchiver,
+  startJobs,
+  startRotater,
+  config,
+} = require("./src");
 
 Command.prototype.baseDirOption = function () {
   return this.option(
@@ -22,9 +24,10 @@ program
   .command("create [files]")
   .description("create sample files")
   .baseDirOption()
-  .action((files, { baseDir }) => {
+  .option("-w , --word <word>", "word to fill files with", "'d   ta\\n'")
+  .action((files, { baseDir, word }) => {
     const filesArray = files?.split(",");
-    createFiles(filesArray, baseDir);
+    createFiles(filesArray, baseDir, word);
   });
 
 program
@@ -88,5 +91,29 @@ program
     } catch (error) {
       console.log(error);
     }
+  });
+
+program
+  .command("init")
+  .description("create configuration file")
+  .action(() => {
+    fs.writeFileSync(
+      "./config.jsonc",
+      `
+    {
+      "baseDir": "./logs", // base directory where log files are located
+      "rotate": {
+          "rotatePattern": "feo_[1-9]-out.log", // pattern for globbing log files to be rotated
+          "minFileSize": 104857600 // minimum size that file must reach to be rotated in bytes
+      },
+      "archive": {
+          "basePattern": "feo_[0-9]-out__", // base archive globbing pattern
+          "suffix": "-[0-9][0-9]_.+.log.?g?z?", // the suffix of the pattern to glob files to e archived
+          "numberOfSkipped": 0, // number of months to be skipped
+          "compress": false // determine whether to compress the archive or not
+      }
+  }
+    `
+    );
   });
 program.parse(process.argv);
