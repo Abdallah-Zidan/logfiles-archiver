@@ -4,15 +4,16 @@ const zlib = require("zlib");
 const { join } = require("path");
 const { pipeline } = require("stream");
 const moment = require("moment");
+
 const { listFilesByPattern } = require("./globber");
 
-async function startRotater(baseDir, pattern) {
+async function startRotater(baseDir, pattern, minSize) {
   const files = await listFilesByPattern(pattern, baseDir);
-  const promises = files.map(fileProcessor(baseDir));
+  const promises = files.map(fileProcessor(baseDir, minSize));
   return await Promise.all(promises);
 }
 
-function fileProcessor(baseDir) {
+function fileProcessor(baseDir, minSize) {
   return async function processFile(fileName) {
     const output = {
       fileName,
@@ -20,6 +21,8 @@ function fileProcessor(baseDir) {
       truncated: false,
     };
     try {
+      const check = await checkFileSize(fileName, baseDir, minSize);
+      if (!check) return output;
       const data = await rotateFile(fileName, baseDir);
       output.rotated = data;
       await truncateFile(fileName, baseDir);
@@ -31,7 +34,10 @@ function fileProcessor(baseDir) {
     }
   };
 }
-
+async function checkFileSize(file, baseDir, minSize) {
+  const size = (await fs.stat(join(baseDir, file))).size;
+  return size > minSize;
+}
 async function truncateFile(fileName, baseDir) {
   await fs.truncate(join(baseDir, fileName));
 }

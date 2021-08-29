@@ -1,0 +1,92 @@
+#!/usr/bin/node
+const { Command } = require("commander");
+
+const config = require("./config");
+const createFiles = require("./src/create");
+const startRotater = require("./src/rotater");
+const startArchiver = require("./src/archiver");
+const startJobs = require("./installjobs");
+
+Command.prototype.baseDirOption = function () {
+  return this.option(
+    "-b,--base-dir <baseDir>",
+    "specify base directory",
+    config.baseDir
+  );
+};
+
+const program = new Command();
+program.version("0.0.1");
+
+program
+  .command("create [files]")
+  .description("create sample files")
+  .baseDirOption()
+  .action((files, { baseDir }) => {
+    const filesArray = files?.split(",");
+    createFiles(filesArray, baseDir);
+  });
+
+program
+  .command("rotate")
+  .description("rotate logs files")
+  .baseDirOption()
+  .option(
+    "-p,--pattern <pattern>",
+    "specify rotation pattern for files",
+    config.rotatePattern
+  )
+  .action(async ({ baseDir, pattern }) => {
+    try {
+      const result = await startRotater(baseDir, pattern, config.minFileSize);
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+program
+  .command("archive")
+  .description("achive log files")
+  .baseDirOption()
+  .option("-p,--pattern <pattern>", "specify base pattern", config.basePattern)
+  .option(
+    "-s,--suffix <suffix>",
+    "specify archive pattern suffix",
+    config.suffix
+  )
+  .option("-c --compress <compress>", "compress files", config.compress)
+  .option(
+    "-k,--skip <skip>",
+    "number of skipped months",
+    config.numberOfSkipped
+  )
+  .action(async ({ baseDir, suffix, pattern, compress, skip }) => {
+    try {
+      const result = await startArchiver({
+        baseDir,
+        basePattern: pattern,
+        compress,
+        suffix,
+        numberOfSkipped: skip,
+      });
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+program
+  .command("jobs")
+  .description(
+    "start archive and rotate as cron jobs using ecosystemfile for configurations"
+  )
+  .action(async () => {
+    try {
+      await startJobs();
+      console.log("scheduled");
+    } catch (error) {
+      console.log(error);
+    }
+  });
+program.parse(process.argv);

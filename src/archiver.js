@@ -15,8 +15,14 @@ async function startArchiver(config) {
     try {
       const files = await listFilesByPattern(pattern, config.baseDir);
       if (files.length > 0) {
-        await archiveFiles(files, config.baseDir, name, config.compress);
+        const result = await archiveFiles(
+          files,
+          config.baseDir,
+          name,
+          config.compress
+        );
         await unlinkGlob(pattern, config.baseDir);
+        return result;
       }
     } catch (error) {
       console.error(error);
@@ -54,7 +60,6 @@ async function archiveFiles(filesArray, baseDir, outputName, compress) {
     });
 
     for (const file of filesArray) {
-      console.log(file);
       archive.file(path.join(baseDir, file), { name: file });
     }
 

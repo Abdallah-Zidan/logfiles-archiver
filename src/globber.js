@@ -18,7 +18,6 @@ function getYear() {
 }
 
 function getYearMonths(numberOfSkipped) {
-  console.log(numberOfSkipped);
   const out = [];
   let month = getMonth();
   while (month > 0) {
